@@ -161,6 +161,16 @@ func (r *RedisClient) getFromHash(ctx context.Context, key string, field string)
 	return &value, err
 }
 
+func (r *RedisClient) getAllFromHash(ctx context.Context, key string) (map[string]string, error) {
+	value, err := r.cli.HGetAll(ctx, key).Result()
+
+	if err != nil {
+		return nil, err
+	}
+
+	return value, nil
+}
+
 func (r *RedisClient) removeFromHash(ctx context.Context, key string, field string) error {
 	_, err := r.cli.HDel(ctx, key, field).Result()
 
@@ -205,4 +215,14 @@ func (r *RedisClient) performTx(ctx context.Context) TxContainer {
 func (x *TxContainer) execTx(ctx context.Context) error {
 	_, err := x.tx.Exec(ctx)
 	return err
+}
+
+func (x *TxContainer) decrementHash(ctx context.Context, key, field string, value float64) *TxContainer {
+	x.tx.HIncrByFloat(ctx, key, field, value*-1)
+	return x
+}
+
+func (x *TxContainer) incrementHash(ctx context.Context, key, field string, value float64) *TxContainer {
+	x.tx.HIncrByFloat(ctx, key, field, value)
+	return x
 }

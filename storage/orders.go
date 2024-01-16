@@ -4,9 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"time"
 	"trade-order-processing-service/external/OPS"
 	"trade-order-processing-service/models"
+	"trade-order-processing-service/staticerr"
 	"trade-order-processing-service/utils"
 
 	"github.com/redis/go-redis/v9"
@@ -18,6 +20,7 @@ const (
 	ordersCreationDateKey      = "orders:creation_date"
 	ordersCurrencyDirectionKey = "orders:%s:%d"
 	ordersExpirationDateKey    = "orders:expire"
+	ordersStockPrices          = "orders:stock:"
 	ordersLocksKey             = "lock_order:"
 	matchingCandidatesIndex    = "orders:matching:"
 	limitPriceIndex            = "orders:limit:"
@@ -29,6 +32,10 @@ var (
 		int(OPS.OpsOrderDirection_OPS_ORDER_DIRECTION_SELL.Number()): -1,
 	}
 )
+
+func buildStockKey(currencyPair string, direction int) string {
+	return fmt.Sprintf(ordersStockPrices+"%s:%d", currencyPair, direction)
+}
 
 type OrdersStorage struct {
 	client *RedisClient
@@ -102,6 +109,7 @@ func (o *OrdersStorage) AddInStockBook(ctx context.Context, orderInfo models.Ord
 		addInZSet(ctx, ordersCreationDateKey, orderInfo.OrderId, float64(orderInfo.CreationDate)).
 		addInSet(ctx, fmt.Sprintf(ordersCurrencyDirectionKey, orderInfo.CurrencyPair, orderInfo.Direction), orderInfo.OrderId).
 		addInHash(ctx, ordersExpirationDateKey, orderInfo.OrderId, orderInfo.ExpirationDate).
+		incrementHash(ctx, buildStockKey(orderInfo.CurrencyPair, orderInfo.Direction), fmt.Sprintf("%f", orderInfo.LimitPrice), orderInfo.AskVolume).
 		execTx(ctx)
 
 	if err != nil {
@@ -109,6 +117,38 @@ func (o *OrdersStorage) AddInStockBook(ctx context.Context, orderInfo models.Ord
 	}
 
 	return nil
+}
+
+func (o OrdersStorage) GetStockPriceByCurrencyPairAndDirection(ctx context.Context, currencyPair string, direction int) (float64, error) {
+	values, err := o.client.getAllFromHash(ctx, buildStockKey(currencyPair, direction))
+
+	if err != nil {
+		return 0, err
+	}
+
+	totalVolume := 0.00
+	avgPrice := 0.00
+
+	for price, volume := range values {
+		floatPrice, err := strconv.ParseFloat(price, 2)
+		if err != nil {
+			continue
+		}
+		floatVolume, err := strconv.ParseFloat(volume, 2)
+
+		if err != nil {
+			continue
+		}
+
+		totalVolume += floatVolume
+		avgPrice += floatPrice * floatVolume
+	}
+
+	if totalVolume == 0 {
+		return 0, staticerr.ErrorStockBookIsEmpty
+	}
+
+	return avgPrice / totalVolume, nil
 }
 
 func (o *OrdersStorage) DropFromStockBook(ctx context.Context, orderInfo models.OrderModel) error {
@@ -119,6 +159,7 @@ func (o *OrdersStorage) DropFromStockBook(ctx context.Context, orderInfo models.
 		removeFromZSet(ctx, ordersCreationDateKey, orderInfo.OrderId).
 		removeFromSet(ctx, fmt.Sprintf(ordersCurrencyDirectionKey, orderInfo.CurrencyPair, orderInfo.Direction), orderInfo.OrderId).
 		removeFromHash(ctx, ordersExpirationDateKey, orderInfo.OrderId).
+		decrementHash(ctx, buildStockKey(orderInfo.CurrencyPair, orderInfo.Direction), fmt.Sprintf("%f", orderInfo.LimitPrice), orderInfo.AskVolume).
 		execTx(ctx)
 
 	if err != nil {
