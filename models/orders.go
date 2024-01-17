@@ -18,4 +18,5 @@ type OrderModel struct {
 	TransferId     string  `json:"transfer_id,omitempty"`
 	State          int     `json:"state,omitempty"`
 	ParentId       string  `json:"parent_id,omitempty"`
+	ExchangeId     string  `json:"exchange_id,omitempty"`
 }

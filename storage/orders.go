@@ -211,6 +211,10 @@ func (o *OrdersStorage) GetOrdersForMatch(ctx context.Context, id string) ([]str
 		return nil, err
 	}
 
+	if len(ids) == 0 {
+		return nil, staticerr.ErrorStockBookIsEmpty
+	}
+
 	return ids, nil
 }
 
