@@ -2,38 +2,39 @@ package utils
 
 import (
 	"time"
-	"trade-order-processing-service/external/OPS"
-	"trade-order-processing-service/external/balances"
+
+	"trade-order-processing-service/external/bps"
+	"trade-order-processing-service/external/ops"
 	"trade-order-processing-service/models"
 
 	"github.com/google/uuid"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-func MapOrderInfoToProto(model models.OrderModel) *OPS.OpsOrderInfo {
-	return &OPS.OpsOrderInfo{
+func MapOrderInfoToProto(model models.OrderModel) *ops.OpsOrderInfo {
+	return &ops.OpsOrderInfo{
 		Id:             uuid.NewString(),
 		OrderId:        model.OrderId,
 		AccountId:      model.AccountId,
 		AssetId:        model.AssetId,
 		CurrencyPair:   model.CurrencyPair,
-		Direction:      OPS.OpsOrderDirection(model.Direction),
+		Direction:      ops.OpsOrderDirection(model.Direction),
 		LimitPrice:     model.LimitPrice,
 		AskVolume:      model.AskVolume,
 		FilledVolume:   model.FilledVolume,
-		Type:           OPS.OpsOrderType(model.Type),
+		Type:           ops.OpsOrderType(model.Type),
 		FillPrice:      model.FilledVolume,
 		CreationDate:   timestamppb.New(time.UnixMilli(model.CreationDate)),
 		UpdatedDate:    timestamppb.New(time.UnixMilli(model.UpdatedDate)),
 		ExpirationDate: timestamppb.New(time.UnixMilli(model.ExpirationDate)),
 		MatchingDate:   timestamppb.New(time.UnixMilli(model.MatchingDate)),
 		TransferId:     model.TransferId,
-		State:          OPS.OpsOrderState(model.State),
+		State:          ops.OpsOrderState(model.State),
 		ExchangeId:     model.ExchangeId,
 	}
 }
 
-func MapProtoOrderInfoToModel(protoModel *OPS.OpsOrderInfo) models.OrderModel {
+func MapProtoOrderInfoToModel(protoModel *ops.OpsOrderInfo) models.OrderModel {
 	return models.OrderModel{
 		OrderId:        protoModel.OrderId,
 		AccountId:      protoModel.AccountId,
@@ -56,20 +57,20 @@ func MapProtoOrderInfoToModel(protoModel *OPS.OpsOrderInfo) models.OrderModel {
 	}
 }
 
-func MapBpsErrorToOpsError(err *balances.BpsError) *OPS.OpsError {
+func MapBpsErrorToOpsError(err *bps.BpsError) *ops.OpsError {
 	if err == nil {
 		return nil
 	}
 
 	switch err.ErrorCode {
-	case balances.BpsErrorCode_BPS_ERROR_CODE_ASSET_NOT_RELATED_TO_ACCOUNT:
-		return &OPS.OpsError{Message: err.Message, ErrorCode: OPS.OpsErrorCode_OPS_ERROR_CODE_ASSET_NOT_RELATED_TO_ACCOUNT}
-	case balances.BpsErrorCode_BPS_ERROR_CODE_NOT_EXISTS_ASSET:
-		return &OPS.OpsError{Message: err.Message, ErrorCode: OPS.OpsErrorCode_OPS_ERROR_CODE_ASSSET_NOT_EXISTS}
-	case balances.BpsErrorCode_BPS_ERROR_CODE_NOT_ENOUGH_BALANCE:
-		return &OPS.OpsError{Message: err.Message, ErrorCode: OPS.OpsErrorCode_OPS_ERROR_CODE_ASSET_BALANCE_NOT_ENOUGH}
+	case bps.BpsErrorCode_BPS_ERROR_CODE_ASSET_NOT_RELATED_TO_ACCOUNT:
+		return &ops.OpsError{Message: err.Message, ErrorCode: ops.OpsErrorCode_OPS_ERROR_CODE_ASSET_NOT_RELATED_TO_ACCOUNT}
+	case bps.BpsErrorCode_BPS_ERROR_CODE_NOT_EXISTS_ASSET:
+		return &ops.OpsError{Message: err.Message, ErrorCode: ops.OpsErrorCode_OPS_ERROR_CODE_ASSSET_NOT_EXISTS}
+	case bps.BpsErrorCode_BPS_ERROR_CODE_NOT_ENOUGH_BALANCE:
+		return &ops.OpsError{Message: err.Message, ErrorCode: ops.OpsErrorCode_OPS_ERROR_CODE_ASSET_BALANCE_NOT_ENOUGH}
 	default:
-		return &OPS.OpsError{Message: err.Message, ErrorCode: OPS.OpsErrorCode_OPS_ERROR_CODE_INTERNAL}
+		return &ops.OpsError{Message: err.Message, ErrorCode: ops.OpsErrorCode_OPS_ERROR_CODE_INTERNAL}
 	}
 
 }

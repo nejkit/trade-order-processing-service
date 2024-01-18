@@ -3,8 +3,9 @@ package service
 import (
 	"context"
 	"time"
-	"trade-order-processing-service/external/OPS"
-	"trade-order-processing-service/external/balances"
+
+	"trade-order-processing-service/external/bps"
+	"trade-order-processing-service/external/ops"
 	"trade-order-processing-service/models"
 	"trade-order-processing-service/utils"
 
@@ -27,7 +28,7 @@ type iOrderStorage interface {
 }
 
 type iTicketStorage interface {
-	AddNewTicket(ctx context.Context, operationType OPS.OpsTicketOperation, ticketData protoreflect.ProtoMessage) error
+	AddNewTicket(ctx context.Context, operationType ops.OpsTicketOperation, ticketData protoreflect.ProtoMessage) error
 }
 
 type OrderService struct {
@@ -39,7 +40,7 @@ func NewOrderService(orderStorage iOrderStorage, ticketStorage iTicketStorage) *
 	return &OrderService{orderStorage: orderStorage, ticketStorage: ticketStorage}
 }
 
-func (o *OrderService) CreateOrder(ctx context.Context, request *OPS.OpsCreateOrderRequest) {
+func (o *OrderService) CreateOrder(ctx context.Context, request *ops.OpsCreateOrderRequest) {
 	orderId := uuid.NewString()
 
 	orderInfo := models.OrderModel{
@@ -53,7 +54,7 @@ func (o *OrderService) CreateOrder(ctx context.Context, request *OPS.OpsCreateOr
 		Type:         int(request.Type),
 		CreationDate: time.Now().UTC().UnixMilli(),
 		UpdatedDate:  time.Now().UTC().UnixMilli(),
-		State:        int(OPS.OpsOrderState_OPS_ORDER_STATE_NEW),
+		State:        int(ops.OpsOrderState_OPS_ORDER_STATE_NEW),
 	}
 
 	logrus.WithField("requestId", request.Id).Infoln("Order id for this request: ", orderId)
@@ -69,7 +70,7 @@ func (o *OrderService) CreateOrder(ctx context.Context, request *OPS.OpsCreateOr
 
 	logrus.WithField("orderId", orderId).Errorln("Creation order successfully")
 
-	if err := o.ticketStorage.AddNewTicket(ctx, OPS.OpsTicketOperation_OPS_TICKET_OPERATION_ORDER_NOTIFICATION, utils.MapOrderInfoToProto(orderInfo)); err != nil {
+	if err := o.ticketStorage.AddNewTicket(ctx, ops.OpsTicketOperation_OPS_TICKET_OPERATION_ORDER_NOTIFICATION, utils.MapOrderInfoToProto(orderInfo)); err != nil {
 		logrus.WithField("orderId", orderId).Errorln("Fail save ticket for lock, reason: ", err.Error())
 
 	}
@@ -81,7 +82,7 @@ func (o *OrderService) CreateOrder(ctx context.Context, request *OPS.OpsCreateOr
 		return
 	}
 
-	err = o.ticketStorage.AddNewTicket(ctx, OPS.OpsTicketOperation_OPS_TICKET_OPERATION_LOCK_BALANCE, &balances.BpsLockBalanceRequest{
+	err = o.ticketStorage.AddNewTicket(ctx, ops.OpsTicketOperation_OPS_TICKET_OPERATION_LOCK_BALANCE, &bps.BpsLockBalanceRequest{
 		Id:           orderId,
 		AssetId:      request.AssetId,
 		AccountId:    request.AccountId,
@@ -95,7 +96,7 @@ func (o *OrderService) CreateOrder(ctx context.Context, request *OPS.OpsCreateOr
 	}
 }
 
-func (s *OrderService) ApproveOrderCreation(ctx context.Context, request *balances.BpsLockBalanceResponse) {
+func (s *OrderService) ApproveOrderCreation(ctx context.Context, request *bps.BpsLockBalanceResponse) {
 
 	logrus.WithField("orderId", request.Id).Infoln("Received response from bps, lockBalance: ", request.String())
 
@@ -108,7 +109,7 @@ func (s *OrderService) ApproveOrderCreation(ctx context.Context, request *balanc
 
 	if request.Error != nil {
 		logrus.WithField("orderId", request.Id).Infoln("Order not approved, reason: ", request.Error.ErrorCode, " Try to reject order")
-		orderInfo.State = int(OPS.OpsOrderState_OPS_ORDER_STATE_REJECTED)
+		orderInfo.State = int(ops.OpsOrderState_OPS_ORDER_STATE_REJECTED)
 		orderInfo.UpdatedDate = time.Now().UTC().UnixMilli()
 
 		if err = s.orderStorage.DeleteOrderFromStorage(ctx, orderInfo.OrderId); err != nil {
@@ -118,7 +119,7 @@ func (s *OrderService) ApproveOrderCreation(ctx context.Context, request *balanc
 		protoModel := utils.MapOrderInfoToProto(*orderInfo)
 		protoModel.Cause = utils.MapBpsErrorToOpsError(request.Error)
 
-		if err = s.ticketStorage.AddNewTicket(ctx, OPS.OpsTicketOperation_OPS_TICKET_OPERATION_ORDER_NOTIFICATION, protoModel); err != nil {
+		if err = s.ticketStorage.AddNewTicket(ctx, ops.OpsTicketOperation_OPS_TICKET_OPERATION_ORDER_NOTIFICATION, protoModel); err != nil {
 			logrus.WithField("orderId", request.Id).Errorln("Internal error: ", err.Error())
 			return
 		}
@@ -127,7 +128,7 @@ func (s *OrderService) ApproveOrderCreation(ctx context.Context, request *balanc
 	}
 	logrus.WithField("orderId", request.Id).Infoln("Order is approved, Try to complete order")
 
-	orderInfo.State = int(OPS.OpsOrderState_OPS_ORDER_STATE_APPROVED)
+	orderInfo.State = int(ops.OpsOrderState_OPS_ORDER_STATE_APPROVED)
 	orderInfo.UpdatedDate = time.Now().UTC().UnixMilli()
 	orderInfo.ExpirationDate = time.Now().UTC().Add(time.Hour * 72).UnixMilli()
 	orderInfo.ExchangeId = request.BalanceId
@@ -141,11 +142,11 @@ func (s *OrderService) ApproveOrderCreation(ctx context.Context, request *balanc
 
 	protoModel := utils.MapOrderInfoToProto(*orderInfo)
 
-	if err = s.ticketStorage.AddNewTicket(ctx, OPS.OpsTicketOperation_OPS_TICKET_OPERATION_ORDER_NOTIFICATION, protoModel); err != nil {
+	if err = s.ticketStorage.AddNewTicket(ctx, ops.OpsTicketOperation_OPS_TICKET_OPERATION_ORDER_NOTIFICATION, protoModel); err != nil {
 		logrus.WithField("orderId", request.Id).Errorln("Internal error: ", err.Error())
 	}
 
-	if err = s.ticketStorage.AddNewTicket(ctx, OPS.OpsTicketOperation_OPS_TICKET_OPERATION_MATCH_ORDER, protoModel); err != nil {
+	if err = s.ticketStorage.AddNewTicket(ctx, ops.OpsTicketOperation_OPS_TICKET_OPERATION_MATCH_ORDER, protoModel); err != nil {
 		logrus.WithField("orderId", request.Id).Errorln("Internal error: ", err.Error())
 	}
 
@@ -153,7 +154,7 @@ func (s *OrderService) ApproveOrderCreation(ctx context.Context, request *balanc
 
 func (s *OrderService) calculateLockAmount(ctx context.Context, model models.OrderModel) (float64, error) {
 
-	if model.Direction == int(OPS.OpsOrderDirection_OPS_ORDER_DIRECTION_SELL) {
+	if model.Direction == int(ops.OpsOrderDirection_OPS_ORDER_DIRECTION_SELL) {
 		return model.AskVolume, nil
 	}
 
@@ -163,7 +164,7 @@ func (s *OrderService) calculateLockAmount(ctx context.Context, model models.Ord
 
 func (s *OrderService) enrichMarketOrderStockPrice(ctx context.Context, model *models.OrderModel) error {
 	var err error
-	if model.Type == int(OPS.OpsOrderType_OPS_ORDER_TYPE_MARKET) {
+	if model.Type == int(ops.OpsOrderType_OPS_ORDER_TYPE_MARKET) {
 		model.LimitPrice, err = s.orderStorage.GetStockPriceByCurrencyPairAndDirection(ctx, model.CurrencyPair, model.Direction)
 
 		if err != nil {

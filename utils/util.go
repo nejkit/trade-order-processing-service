@@ -2,7 +2,7 @@ package utils
 
 import (
 	"strings"
-	"trade-order-processing-service/external/OPS"
+	"trade-order-processing-service/external/ops"
 )
 
 func GetOfferCurrencyCode(currencyPair string, direction int) string {
@@ -10,15 +10,24 @@ func GetOfferCurrencyCode(currencyPair string, direction int) string {
 }
 
 func GetAskedCurrencyCode(currencyPair string, direction int) string {
-	if direction == int(OPS.OpsOrderDirection_OPS_ORDER_DIRECTION_BUY) {
+	if direction == int(ops.OpsOrderDirection_OPS_ORDER_DIRECTION_BUY) {
 		return strings.Split(currencyPair, "/")[0]
 	}
 	return strings.Split(currencyPair, "/")[1]
 }
 
 func GetDirectionForBuildMatchingIndex(direction int) int {
-	if direction == int(OPS.OpsOrderDirection_OPS_ORDER_DIRECTION_BUY) {
-		return int(OPS.OpsOrderDirection_OPS_ORDER_DIRECTION_SELL)
+	if direction == int(ops.OpsOrderDirection_OPS_ORDER_DIRECTION_BUY) {
+		return int(ops.OpsOrderDirection_OPS_ORDER_DIRECTION_SELL)
 	}
-	return int(OPS.OpsOrderDirection_OPS_ORDER_DIRECTION_BUY)
+	return int(ops.OpsOrderDirection_OPS_ORDER_DIRECTION_BUY)
+}
+
+func Min(a float64, b float64) float64 {
+	if a < b {
+		return a
+	}
+
+	return b
+
 }

@@ -6,7 +6,8 @@ import (
 	"fmt"
 	"strconv"
 	"time"
-	"trade-order-processing-service/external/OPS"
+
+	"trade-order-processing-service/external/ops"
 	"trade-order-processing-service/models"
 	"trade-order-processing-service/staticerr"
 	"trade-order-processing-service/utils"
@@ -28,8 +29,8 @@ const (
 
 var (
 	OrderPriceSortDirection = map[int]int{
-		int(OPS.OpsOrderDirection_OPS_ORDER_DIRECTION_BUY.Number()):  1,
-		int(OPS.OpsOrderDirection_OPS_ORDER_DIRECTION_SELL.Number()): -1,
+		int(ops.OpsOrderDirection_OPS_ORDER_DIRECTION_BUY.Number()):  1,
+		int(ops.OpsOrderDirection_OPS_ORDER_DIRECTION_SELL.Number()): -1,
 	}
 )
 
@@ -185,7 +186,7 @@ func (o *OrdersStorage) GetOrdersForMatch(ctx context.Context, id string) ([]str
 	}
 
 	priceIndex := ordersPriceKey
-	if orderInfo.Type == int(OPS.OpsOrderType_OPS_ORDER_TYPE_LIMIT) {
+	if orderInfo.Type == int(ops.OpsOrderType_OPS_ORDER_TYPE_LIMIT) {
 		priceIndex, err := o.getPriceIndexForLimit(ctx, *orderInfo)
 
 		if err != nil {
@@ -219,7 +220,7 @@ func (o *OrdersStorage) GetOrdersForMatch(ctx context.Context, id string) ([]str
 }
 
 func (o OrdersStorage) getPriceIndexForLimit(ctx context.Context, orderInfo models.OrderModel) (*string, error) {
-	if OPS.OpsOrderDirection_OPS_ORDER_DIRECTION_BUY == OPS.OpsOrderDirection(orderInfo.Direction) {
+	if ops.OpsOrderDirection_OPS_ORDER_DIRECTION_BUY == ops.OpsOrderDirection(orderInfo.Direction) {
 		return o.prepareIndexWithLimitOption(ctx, LimitOptions{
 			maxPrice: orderInfo.LimitPrice,
 			minPrice: 0,

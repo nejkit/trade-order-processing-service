@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
-	"trade-order-processing-service/external/OPS"
+	"trade-order-processing-service/external/ops"
 
 	"github.com/google/uuid"
 	"google.golang.org/protobuf/proto"
@@ -23,7 +23,7 @@ func NewTicketStorage(client *RedisClient) *TicketStorage {
 	return &TicketStorage{client: client}
 }
 
-func (t *TicketStorage) AddNewTicket(ctx context.Context, operationType OPS.OpsTicketOperation, ticketData protoreflect.ProtoMessage) error {
+func (t *TicketStorage) AddNewTicket(ctx context.Context, operationType ops.OpsTicketOperation, ticketData protoreflect.ProtoMessage) error {
 	ticketId := uuid.NewString()
 
 	bytes, err := proto.Marshal(ticketData)
@@ -38,10 +38,10 @@ func (t *TicketStorage) AddNewTicket(ctx context.Context, operationType OPS.OpsT
 		return err
 	}
 
-	ticketDto := &OPS.Ticket{
+	ticketDto := &ops.Ticket{
 		TicketId:      ticketId,
 		OperationType: operationType,
-		State:         OPS.OpsTicketState_OPS_TICKET_STATE_NEW,
+		State:         ops.OpsTicketState_OPS_TICKET_STATE_NEW,
 		Data:          data,
 	}
 
@@ -55,14 +55,14 @@ func (t *TicketStorage) AddNewTicket(ctx context.Context, operationType OPS.OpsT
 
 }
 
-func (t *TicketStorage) GetTicketFromStorage(ctx context.Context) (*OPS.Ticket, error) {
+func (t *TicketStorage) GetTicketFromStorage(ctx context.Context) (*ops.Ticket, error) {
 	jsonData, err := t.client.getFromList(ctx, ticketsListKey)
 
 	if err != nil {
 		return nil, err
 	}
 
-	var ticketDto OPS.Ticket
+	var ticketDto ops.Ticket
 
 	err = json.Unmarshal([]byte(*jsonData), &ticketDto)
 
@@ -73,7 +73,7 @@ func (t *TicketStorage) GetTicketFromStorage(ctx context.Context) (*OPS.Ticket, 
 	return &ticketDto, nil
 }
 
-func (t *TicketStorage) UpdateTicketInStorage(ctx context.Context, request *OPS.Ticket) error {
+func (t *TicketStorage) UpdateTicketInStorage(ctx context.Context, request *ops.Ticket) error {
 	jsonData, err := json.Marshal(request)
 
 	if err != nil {

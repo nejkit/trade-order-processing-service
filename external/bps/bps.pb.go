@@ -4,7 +4,7 @@
 // 	protoc        v3.21.6
 // source: bps.proto
 
-package balances
+package bps
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -20,6 +20,61 @@ const (
 	// Verify that runtime/protoimpl is sufficiently up-to-date.
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
+
+type BpsTransferState int32
+
+const (
+	BpsTransferState_BPS_TRANSFER_STATE_NEW        BpsTransferState = 0
+	BpsTransferState_BPS_TRANSFER_STATE_IN_PROCESS BpsTransferState = 1
+	BpsTransferState_BPS_TRANSFER_STATE_DONE       BpsTransferState = 2
+	BpsTransferState_BPS_TRANSFER_STATE_REJECTED   BpsTransferState = 3
+	BpsTransferState_BPS_TRANSFER_STATE_ERROR      BpsTransferState = 4
+)
+
+// Enum value maps for BpsTransferState.
+var (
+	BpsTransferState_name = map[int32]string{
+		0: "BPS_TRANSFER_STATE_NEW",
+		1: "BPS_TRANSFER_STATE_IN_PROCESS",
+		2: "BPS_TRANSFER_STATE_DONE",
+		3: "BPS_TRANSFER_STATE_REJECTED",
+		4: "BPS_TRANSFER_STATE_ERROR",
+	}
+	BpsTransferState_value = map[string]int32{
+		"BPS_TRANSFER_STATE_NEW":        0,
+		"BPS_TRANSFER_STATE_IN_PROCESS": 1,
+		"BPS_TRANSFER_STATE_DONE":       2,
+		"BPS_TRANSFER_STATE_REJECTED":   3,
+		"BPS_TRANSFER_STATE_ERROR":      4,
+	}
+)
+
+func (x BpsTransferState) Enum() *BpsTransferState {
+	p := new(BpsTransferState)
+	*p = x
+	return p
+}
+
+func (x BpsTransferState) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (BpsTransferState) Descriptor() protoreflect.EnumDescriptor {
+	return file_bps_proto_enumTypes[0].Descriptor()
+}
+
+func (BpsTransferState) Type() protoreflect.EnumType {
+	return &file_bps_proto_enumTypes[0]
+}
+
+func (x BpsTransferState) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use BpsTransferState.Descriptor instead.
+func (BpsTransferState) EnumDescriptor() ([]byte, []int) {
+	return file_bps_proto_rawDescGZIP(), []int{0}
+}
 
 type EmmitBalanceInfo struct {
 	state         protoimpl.MessageState
@@ -1061,6 +1116,187 @@ func (x *BpsRefundBalanceResponse) GetError() *BpsError {
 	return nil
 }
 
+type BpsTransferData struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	BalanceId string  `protobuf:"bytes,1,opt,name=balance_id,json=balanceId,proto3" json:"balance_id,omitempty"`
+	Amount    float64 `protobuf:"fixed64,2,opt,name=amount,proto3" json:"amount,omitempty"`
+}
+
+func (x *BpsTransferData) Reset() {
+	*x = BpsTransferData{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_bps_proto_msgTypes[16]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *BpsTransferData) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*BpsTransferData) ProtoMessage() {}
+
+func (x *BpsTransferData) ProtoReflect() protoreflect.Message {
+	mi := &file_bps_proto_msgTypes[16]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use BpsTransferData.ProtoReflect.Descriptor instead.
+func (*BpsTransferData) Descriptor() ([]byte, []int) {
+	return file_bps_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *BpsTransferData) GetBalanceId() string {
+	if x != nil {
+		return x.BalanceId
+	}
+	return ""
+}
+
+func (x *BpsTransferData) GetAmount() float64 {
+	if x != nil {
+		return x.Amount
+	}
+	return 0
+}
+
+type BpsCreateTransferRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Id           string             `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	TransferData []*BpsTransferData `protobuf:"bytes,2,rep,name=transfer_data,json=transferData,proto3" json:"transfer_data,omitempty"`
+}
+
+func (x *BpsCreateTransferRequest) Reset() {
+	*x = BpsCreateTransferRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_bps_proto_msgTypes[17]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *BpsCreateTransferRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*BpsCreateTransferRequest) ProtoMessage() {}
+
+func (x *BpsCreateTransferRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_bps_proto_msgTypes[17]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use BpsCreateTransferRequest.ProtoReflect.Descriptor instead.
+func (*BpsCreateTransferRequest) Descriptor() ([]byte, []int) {
+	return file_bps_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *BpsCreateTransferRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *BpsCreateTransferRequest) GetTransferData() []*BpsTransferData {
+	if x != nil {
+		return x.TransferData
+	}
+	return nil
+}
+
+type BpsTransfer struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Id            string             `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	TransferData  []*BpsTransferData `protobuf:"bytes,2,rep,name=transfer_data,json=transferData,proto3" json:"transfer_data,omitempty"`
+	TransferState BpsTransferState   `protobuf:"varint,3,opt,name=transfer_state,json=transferState,proto3,enum=BPS.BpsTransferState" json:"transfer_state,omitempty"`
+	Error         *BpsError          `protobuf:"bytes,4,opt,name=error,proto3" json:"error,omitempty"`
+}
+
+func (x *BpsTransfer) Reset() {
+	*x = BpsTransfer{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_bps_proto_msgTypes[18]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *BpsTransfer) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*BpsTransfer) ProtoMessage() {}
+
+func (x *BpsTransfer) ProtoReflect() protoreflect.Message {
+	mi := &file_bps_proto_msgTypes[18]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use BpsTransfer.ProtoReflect.Descriptor instead.
+func (*BpsTransfer) Descriptor() ([]byte, []int) {
+	return file_bps_proto_rawDescGZIP(), []int{18}
+}
+
+func (x *BpsTransfer) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *BpsTransfer) GetTransferData() []*BpsTransferData {
+	if x != nil {
+		return x.TransferData
+	}
+	return nil
+}
+
+func (x *BpsTransfer) GetTransferState() BpsTransferState {
+	if x != nil {
+		return x.TransferState
+	}
+	return BpsTransferState_BPS_TRANSFER_STATE_NEW
+}
+
+func (x *BpsTransfer) GetError() *BpsError {
+	if x != nil {
+		return x.Error
+	}
+	return nil
+}
+
 var File_bps_proto protoreflect.FileDescriptor
 
 var file_bps_proto_rawDesc = []byte{
@@ -1189,9 +1425,42 @@ var file_bps_proto_rawDesc = []byte{
 	0x63, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64,
 	0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x02, 0x69, 0x64, 0x12, 0x23, 0x0a, 0x05, 0x65, 0x72,
 	0x72, 0x6f, 0x72, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0d, 0x2e, 0x42, 0x50, 0x53, 0x2e,
-	0x42, 0x70, 0x73, 0x45, 0x72, 0x72, 0x6f, 0x72, 0x52, 0x05, 0x65, 0x72, 0x72, 0x6f, 0x72, 0x42,
-	0x0b, 0x5a, 0x09, 0x2f, 0x62, 0x61, 0x6c, 0x61, 0x6e, 0x63, 0x65, 0x73, 0x62, 0x06, 0x70, 0x72,
-	0x6f, 0x74, 0x6f, 0x33,
+	0x42, 0x70, 0x73, 0x45, 0x72, 0x72, 0x6f, 0x72, 0x52, 0x05, 0x65, 0x72, 0x72, 0x6f, 0x72, 0x22,
+	0x48, 0x0a, 0x0f, 0x42, 0x70, 0x73, 0x54, 0x72, 0x61, 0x6e, 0x73, 0x66, 0x65, 0x72, 0x44, 0x61,
+	0x74, 0x61, 0x12, 0x1d, 0x0a, 0x0a, 0x62, 0x61, 0x6c, 0x61, 0x6e, 0x63, 0x65, 0x5f, 0x69, 0x64,
+	0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x62, 0x61, 0x6c, 0x61, 0x6e, 0x63, 0x65, 0x49,
+	0x64, 0x12, 0x16, 0x0a, 0x06, 0x61, 0x6d, 0x6f, 0x75, 0x6e, 0x74, 0x18, 0x02, 0x20, 0x01, 0x28,
+	0x01, 0x52, 0x06, 0x61, 0x6d, 0x6f, 0x75, 0x6e, 0x74, 0x22, 0x65, 0x0a, 0x18, 0x42, 0x70, 0x73,
+	0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x54, 0x72, 0x61, 0x6e, 0x73, 0x66, 0x65, 0x72, 0x52, 0x65,
+	0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28,
+	0x09, 0x52, 0x02, 0x69, 0x64, 0x12, 0x39, 0x0a, 0x0d, 0x74, 0x72, 0x61, 0x6e, 0x73, 0x66, 0x65,
+	0x72, 0x5f, 0x64, 0x61, 0x74, 0x61, 0x18, 0x02, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x14, 0x2e, 0x42,
+	0x50, 0x53, 0x2e, 0x42, 0x70, 0x73, 0x54, 0x72, 0x61, 0x6e, 0x73, 0x66, 0x65, 0x72, 0x44, 0x61,
+	0x74, 0x61, 0x52, 0x0c, 0x74, 0x72, 0x61, 0x6e, 0x73, 0x66, 0x65, 0x72, 0x44, 0x61, 0x74, 0x61,
+	0x22, 0xbb, 0x01, 0x0a, 0x0b, 0x42, 0x70, 0x73, 0x54, 0x72, 0x61, 0x6e, 0x73, 0x66, 0x65, 0x72,
+	0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x02, 0x69, 0x64,
+	0x12, 0x39, 0x0a, 0x0d, 0x74, 0x72, 0x61, 0x6e, 0x73, 0x66, 0x65, 0x72, 0x5f, 0x64, 0x61, 0x74,
+	0x61, 0x18, 0x02, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x14, 0x2e, 0x42, 0x50, 0x53, 0x2e, 0x42, 0x70,
+	0x73, 0x54, 0x72, 0x61, 0x6e, 0x73, 0x66, 0x65, 0x72, 0x44, 0x61, 0x74, 0x61, 0x52, 0x0c, 0x74,
+	0x72, 0x61, 0x6e, 0x73, 0x66, 0x65, 0x72, 0x44, 0x61, 0x74, 0x61, 0x12, 0x3c, 0x0a, 0x0e, 0x74,
+	0x72, 0x61, 0x6e, 0x73, 0x66, 0x65, 0x72, 0x5f, 0x73, 0x74, 0x61, 0x74, 0x65, 0x18, 0x03, 0x20,
+	0x01, 0x28, 0x0e, 0x32, 0x15, 0x2e, 0x42, 0x50, 0x53, 0x2e, 0x42, 0x70, 0x73, 0x54, 0x72, 0x61,
+	0x6e, 0x73, 0x66, 0x65, 0x72, 0x53, 0x74, 0x61, 0x74, 0x65, 0x52, 0x0d, 0x74, 0x72, 0x61, 0x6e,
+	0x73, 0x66, 0x65, 0x72, 0x53, 0x74, 0x61, 0x74, 0x65, 0x12, 0x23, 0x0a, 0x05, 0x65, 0x72, 0x72,
+	0x6f, 0x72, 0x18, 0x04, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0d, 0x2e, 0x42, 0x50, 0x53, 0x2e, 0x42,
+	0x70, 0x73, 0x45, 0x72, 0x72, 0x6f, 0x72, 0x52, 0x05, 0x65, 0x72, 0x72, 0x6f, 0x72, 0x2a, 0xad,
+	0x01, 0x0a, 0x10, 0x42, 0x70, 0x73, 0x54, 0x72, 0x61, 0x6e, 0x73, 0x66, 0x65, 0x72, 0x53, 0x74,
+	0x61, 0x74, 0x65, 0x12, 0x1a, 0x0a, 0x16, 0x42, 0x50, 0x53, 0x5f, 0x54, 0x52, 0x41, 0x4e, 0x53,
+	0x46, 0x45, 0x52, 0x5f, 0x53, 0x54, 0x41, 0x54, 0x45, 0x5f, 0x4e, 0x45, 0x57, 0x10, 0x00, 0x12,
+	0x21, 0x0a, 0x1d, 0x42, 0x50, 0x53, 0x5f, 0x54, 0x52, 0x41, 0x4e, 0x53, 0x46, 0x45, 0x52, 0x5f,
+	0x53, 0x54, 0x41, 0x54, 0x45, 0x5f, 0x49, 0x4e, 0x5f, 0x50, 0x52, 0x4f, 0x43, 0x45, 0x53, 0x53,
+	0x10, 0x01, 0x12, 0x1b, 0x0a, 0x17, 0x42, 0x50, 0x53, 0x5f, 0x54, 0x52, 0x41, 0x4e, 0x53, 0x46,
+	0x45, 0x52, 0x5f, 0x53, 0x54, 0x41, 0x54, 0x45, 0x5f, 0x44, 0x4f, 0x4e, 0x45, 0x10, 0x02, 0x12,
+	0x1f, 0x0a, 0x1b, 0x42, 0x50, 0x53, 0x5f, 0x54, 0x52, 0x41, 0x4e, 0x53, 0x46, 0x45, 0x52, 0x5f,
+	0x53, 0x54, 0x41, 0x54, 0x45, 0x5f, 0x52, 0x45, 0x4a, 0x45, 0x43, 0x54, 0x45, 0x44, 0x10, 0x03,
+	0x12, 0x1c, 0x0a, 0x18, 0x42, 0x50, 0x53, 0x5f, 0x54, 0x52, 0x41, 0x4e, 0x53, 0x46, 0x45, 0x52,
+	0x5f, 0x53, 0x54, 0x41, 0x54, 0x45, 0x5f, 0x45, 0x52, 0x52, 0x4f, 0x52, 0x10, 0x04, 0x42, 0x06,
+	0x5a, 0x04, 0x2f, 0x62, 0x70, 0x73, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -1206,44 +1475,53 @@ func file_bps_proto_rawDescGZIP() []byte {
 	return file_bps_proto_rawDescData
 }
 
-var file_bps_proto_msgTypes = make([]protoimpl.MessageInfo, 16)
+var file_bps_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
+var file_bps_proto_msgTypes = make([]protoimpl.MessageInfo, 19)
 var file_bps_proto_goTypes = []interface{}{
-	(*EmmitBalanceInfo)(nil),           // 0: BPS.EmmitBalanceInfo
-	(*BalanceInfo)(nil),                // 1: BPS.BalanceInfo
-	(*BpsEmmitAssetRequest)(nil),       // 2: BPS.BpsEmmitAssetRequest
-	(*BpsEmmitAssetResponse)(nil),      // 3: BPS.BpsEmmitAssetResponse
-	(*BpsCreateAssetRequest)(nil),      // 4: BPS.BpsCreateAssetRequest
-	(*BpsCreateAssetResponse)(nil),     // 5: BPS.BpsCreateAssetResponse
-	(*BbsGetAssetInfoRequest)(nil),     // 6: BPS.BbsGetAssetInfoRequest
-	(*BpsGetAssetInfoResponse)(nil),    // 7: BPS.BpsGetAssetInfoResponse
-	(*BpsDeactivateAssetRequest)(nil),  // 8: BPS.BpsDeactivateAssetRequest
-	(*BpsDeactivateAssetResponse)(nil), // 9: BPS.BpsDeactivateAssetResponse
-	(*BpsAddCurrencyRequest)(nil),      // 10: BPS.BpsAddCurrencyRequest
-	(*BpsAddCurrencyResponse)(nil),     // 11: BPS.BpsAddCurrencyResponse
-	(*BpsLockBalanceRequest)(nil),      // 12: BPS.BpsLockBalanceRequest
-	(*BpsLockBalanceResponse)(nil),     // 13: BPS.BpsLockBalanceResponse
-	(*BpsRefundBalanceRequest)(nil),    // 14: BPS.BpsRefundBalanceRequest
-	(*BpsRefundBalanceResponse)(nil),   // 15: BPS.BpsRefundBalanceResponse
-	(*BpsError)(nil),                   // 16: BPS.BpsError
-	(*timestamppb.Timestamp)(nil),      // 17: google.protobuf.Timestamp
+	(BpsTransferState)(0),              // 0: BPS.BpsTransferState
+	(*EmmitBalanceInfo)(nil),           // 1: BPS.EmmitBalanceInfo
+	(*BalanceInfo)(nil),                // 2: BPS.BalanceInfo
+	(*BpsEmmitAssetRequest)(nil),       // 3: BPS.BpsEmmitAssetRequest
+	(*BpsEmmitAssetResponse)(nil),      // 4: BPS.BpsEmmitAssetResponse
+	(*BpsCreateAssetRequest)(nil),      // 5: BPS.BpsCreateAssetRequest
+	(*BpsCreateAssetResponse)(nil),     // 6: BPS.BpsCreateAssetResponse
+	(*BbsGetAssetInfoRequest)(nil),     // 7: BPS.BbsGetAssetInfoRequest
+	(*BpsGetAssetInfoResponse)(nil),    // 8: BPS.BpsGetAssetInfoResponse
+	(*BpsDeactivateAssetRequest)(nil),  // 9: BPS.BpsDeactivateAssetRequest
+	(*BpsDeactivateAssetResponse)(nil), // 10: BPS.BpsDeactivateAssetResponse
+	(*BpsAddCurrencyRequest)(nil),      // 11: BPS.BpsAddCurrencyRequest
+	(*BpsAddCurrencyResponse)(nil),     // 12: BPS.BpsAddCurrencyResponse
+	(*BpsLockBalanceRequest)(nil),      // 13: BPS.BpsLockBalanceRequest
+	(*BpsLockBalanceResponse)(nil),     // 14: BPS.BpsLockBalanceResponse
+	(*BpsRefundBalanceRequest)(nil),    // 15: BPS.BpsRefundBalanceRequest
+	(*BpsRefundBalanceResponse)(nil),   // 16: BPS.BpsRefundBalanceResponse
+	(*BpsTransferData)(nil),            // 17: BPS.BpsTransferData
+	(*BpsCreateTransferRequest)(nil),   // 18: BPS.BpsCreateTransferRequest
+	(*BpsTransfer)(nil),                // 19: BPS.BpsTransfer
+	(*BpsError)(nil),                   // 20: BPS.BpsError
+	(*timestamppb.Timestamp)(nil),      // 21: google.protobuf.Timestamp
 }
 var file_bps_proto_depIdxs = []int32{
-	0,  // 0: BPS.BpsEmmitAssetRequest.emit_balances_info:type_name -> BPS.EmmitBalanceInfo
-	16, // 1: BPS.BpsEmmitAssetResponse.error:type_name -> BPS.BpsError
-	0,  // 2: BPS.BpsCreateAssetRequest.emmit_info:type_name -> BPS.EmmitBalanceInfo
-	16, // 3: BPS.BpsCreateAssetResponse.error:type_name -> BPS.BpsError
-	17, // 4: BPS.BpsGetAssetInfoResponse.created_date:type_name -> google.protobuf.Timestamp
-	1,  // 5: BPS.BpsGetAssetInfoResponse.balances_info:type_name -> BPS.BalanceInfo
-	16, // 6: BPS.BpsGetAssetInfoResponse.error:type_name -> BPS.BpsError
-	16, // 7: BPS.BpsDeactivateAssetResponse.error:type_name -> BPS.BpsError
-	16, // 8: BPS.BpsAddCurrencyResponse.error:type_name -> BPS.BpsError
-	16, // 9: BPS.BpsLockBalanceResponse.error:type_name -> BPS.BpsError
-	16, // 10: BPS.BpsRefundBalanceResponse.error:type_name -> BPS.BpsError
-	11, // [11:11] is the sub-list for method output_type
-	11, // [11:11] is the sub-list for method input_type
-	11, // [11:11] is the sub-list for extension type_name
-	11, // [11:11] is the sub-list for extension extendee
-	0,  // [0:11] is the sub-list for field type_name
+	1,  // 0: BPS.BpsEmmitAssetRequest.emit_balances_info:type_name -> BPS.EmmitBalanceInfo
+	20, // 1: BPS.BpsEmmitAssetResponse.error:type_name -> BPS.BpsError
+	1,  // 2: BPS.BpsCreateAssetRequest.emmit_info:type_name -> BPS.EmmitBalanceInfo
+	20, // 3: BPS.BpsCreateAssetResponse.error:type_name -> BPS.BpsError
+	21, // 4: BPS.BpsGetAssetInfoResponse.created_date:type_name -> google.protobuf.Timestamp
+	2,  // 5: BPS.BpsGetAssetInfoResponse.balances_info:type_name -> BPS.BalanceInfo
+	20, // 6: BPS.BpsGetAssetInfoResponse.error:type_name -> BPS.BpsError
+	20, // 7: BPS.BpsDeactivateAssetResponse.error:type_name -> BPS.BpsError
+	20, // 8: BPS.BpsAddCurrencyResponse.error:type_name -> BPS.BpsError
+	20, // 9: BPS.BpsLockBalanceResponse.error:type_name -> BPS.BpsError
+	20, // 10: BPS.BpsRefundBalanceResponse.error:type_name -> BPS.BpsError
+	17, // 11: BPS.BpsCreateTransferRequest.transfer_data:type_name -> BPS.BpsTransferData
+	17, // 12: BPS.BpsTransfer.transfer_data:type_name -> BPS.BpsTransferData
+	0,  // 13: BPS.BpsTransfer.transfer_state:type_name -> BPS.BpsTransferState
+	20, // 14: BPS.BpsTransfer.error:type_name -> BPS.BpsError
+	15, // [15:15] is the sub-list for method output_type
+	15, // [15:15] is the sub-list for method input_type
+	15, // [15:15] is the sub-list for extension type_name
+	15, // [15:15] is the sub-list for extension extendee
+	0,  // [0:15] is the sub-list for field type_name
 }
 
 func init() { file_bps_proto_init() }
@@ -1445,19 +1723,56 @@ func file_bps_proto_init() {
 				return nil
 			}
 		}
+		file_bps_proto_msgTypes[16].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*BpsTransferData); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_bps_proto_msgTypes[17].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*BpsCreateTransferRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_bps_proto_msgTypes[18].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*BpsTransfer); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_bps_proto_rawDesc,
-			NumEnums:      0,
-			NumMessages:   16,
+			NumEnums:      1,
+			NumMessages:   19,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
 		GoTypes:           file_bps_proto_goTypes,
 		DependencyIndexes: file_bps_proto_depIdxs,
+		EnumInfos:         file_bps_proto_enumTypes,
 		MessageInfos:      file_bps_proto_msgTypes,
 	}.Build()
 	File_bps_proto = out.File
